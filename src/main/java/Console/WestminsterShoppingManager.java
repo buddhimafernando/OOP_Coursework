@@ -38,18 +38,18 @@ public class WestminsterShoppingManager {
     }
 
     public void saveToFile() {
-        try (FileWriter writer = new FileWriter("products.txt")) {
+        try (FileWriter writer = new FileWriter("ProductsList.txt")) {
             for (Product product : products) {
                 writer.write(product.toString() + "\n");  // Write each product's details to the file
             }
-            System.out.println("Products saved successfully to products.txt");
+            System.out.println("Products saved successfully to ProductsList.txt");
         } catch (IOException e) {
             System.err.println("Error saving products: " + e.getMessage());
         }
     }
 
     public void loadFromFile() {
-        try (Scanner scanner = new Scanner(new File("products.txt"))) {
+        try (Scanner scanner = new Scanner(new File("ProductsList.txt"))) {
             while (scanner.hasNextLine()) {
                 String productLine = scanner.nextLine();
                 String[] productData = productLine.split(",", -1); // Preserve trailing empty strings
@@ -87,7 +87,7 @@ public class WestminsterShoppingManager {
                     System.err.println("Invalid format in line: " + productLine);
                 }
             }
-            System.out.println("Products loaded successfully from products.txt");
+            System.out.println("Products loaded successfully from ProductsList.txt");
         } catch (IOException e) {
             if (e.getMessage().contains("No such file or directory")) {
                 System.out.println("No saved products found. Starting with a fresh list.");
@@ -96,7 +96,5 @@ public class WestminsterShoppingManager {
             }
         }
     }
-
-
 }
 

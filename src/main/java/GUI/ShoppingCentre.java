@@ -1,5 +1,7 @@
 package GUI;
 
+import Console.Clothing;
+import Console.Electronics;
 import Console.Product;
 import Console.ShoppingCart;
 
@@ -13,6 +15,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ShoppingCentre implements ActionListener, ListSelectionListener {
 
@@ -82,7 +86,6 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
         jScrollPane.setBounds(25, 70, 550, 250);
         jPanel.add(jScrollPane);
 
-        // Adding ListSelectionListener to the productTable
         productTable.getSelectionModel().addListSelectionListener(this);
 
         jFrame.add(jPanel);
@@ -98,13 +101,13 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
             shoppingCartFrame();
         }
         else if(e.getActionCommand().equalsIgnoreCase("Add To Cart")){
-            int idx = table.getSelectedRow();
+            int idx = productTable.getSelectedRow();
             if (idx != -1) {
-                Product product = products.get(idx);
+                Product product = listOfProducts.get(idx);
                 int quantity = Integer.parseInt(JOptionPane.showInputDialog("Please Enter Quantity: "));
-                if(products.get(idx).getQuantity() > 0 && quantity <= products.get(idx).getQuantity()){
-                    products.get(idx).decreaseQuantity(quantity);
-                    shoppingCart.addProduct(product, quantity);
+                if(listOfProducts.get(idx).getNoItems() > 0 && quantity <= listOfProducts.get(idx).getNoItems()){
+                    listOfProducts.get(idx).decreaseQuantity(quantity);
+                    cart.addProductToCart(product, quantity);
                     JOptionPane.showMessageDialog(null, product.getProductName()+" Added To Cart!");
                 }
                 else{
@@ -113,38 +116,96 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
             }
         }
         if(e.getActionCommand().equalsIgnoreCase("comboBoxChanged")){
-            String category = (String) comboBox.getSelectedItem();
-            model.setRowCount(0);
-            for (Product product : products) {
+            String category = (String) categories.getSelectedItem();
+            tableModel.setRowCount(0);
+            for (Product product : listOfProducts) {
                 if(category.equalsIgnoreCase("All")){
-                    Object[] arr = {product.getProductID(), product.getProductName(), product.getProductCategory(), product.getPrice()};
-                    model.addRow(arr);
+                    Object[] arr = {product.getProductId(), product.getProductName(), product.getCategory(), product.getPrice()};
+                    tableModel.addRow(arr);
                 }
-                else if(product.getProductCategory().equalsIgnoreCase(category)){
-                    Object[] arr = {product.getProductID(), product.getProductName(), product.getProductCategory(), product.getPrice()};
-                    model.addRow(arr);
+                else if(product.getCategory().equalsIgnoreCase(category)){
+                    Object[] arr = {product.getProductId(), product.getProductName(), product.getCategory(), product.getPrice()};
+                    tableModel.addRow(arr);
                 }
             }
         }
     }
 
     private void shoppingCartFrame() {
+        JFrame frame = new JFrame("Shopping Cart");
+        frame.setSize(600, 450);
+        JPanel panel = new JPanel();
+        panel.setLayout(null);
+
+        DefaultTableModel model = new DefaultTableModel(
+                new String[]{"Product", "Quantity", "Price"}, 0);
+
+        JScrollPane scrollPane = new JScrollPane(new JTable(model));
+        scrollPane.setBounds(10, 10, 580, 200);
+
+        ArrayList<Product> products = cart.getCart();
+        model.setRowCount(0);
+
+        double total = 0;
+        boolean threeItems = false;
+        int electronicsCount = 0;
+        int clothingCount = 0;
+        double discount = 0;
+
+        for (Product product : products) {
+            int quantity = cart.getQuantity(product);
+
+            Object[] arr = {product.getProductId() + ", " + product.getProductName() + ", " + product.getInfo(), quantity, (quantity * product.getPrice())};
+            model.addRow(arr);
+            total += (quantity * product.getPrice());
+
+            if (product.getCategory().equalsIgnoreCase("Electronics")) {
+                electronicsCount += quantity;
+            } else if (product.getCategory().equalsIgnoreCase("Clothing")) {
+                clothingCount += quantity;
+            }
+
+            if (electronicsCount >= 3 || clothingCount >= 3) {
+                threeItems = true;
+            }
+        }
+
+        JLabel totalL = new JLabel("Total: Rs. " + String.format("%.2f", total));
+        totalL.setBounds(400, 250, 200, 30);
+
+        if (threeItems) {
+            discount = (total * 0.20);
+            JLabel discountLbl20 = new JLabel("Three items in the same Category Discount (20%): -Rs. " + String.format("%.2f", discount));
+            discountLbl20.setBounds(120, 280, 400, 25);
+            panel.add(discountLbl20);
+        }
+
+        JLabel finalL = new JLabel("Final Total: Rs. " + String.format("%.2f", (total - discount)));
+        finalL.setFont(new Font("", Font.BOLD, 12));
+        finalL.setBounds(370, 350, 400, 25);
+
+        frame.add(panel);
+
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+        frame.setVisible(true);
     }
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
-        int selectedRow = table.getSelectedRow();
+        int selectedRow = productTable.getSelectedRow();
         if (selectedRow != -1) {
-            Product selectedProduct = products.get(selectedRow);
+            Product selectedProduct = listOfProducts.get(selectedRow);
             String productDetails = generateProductDetails(selectedProduct);
-            productL.setText(productDetails);
+            productInfo.setText(productDetails);
         }
     }
 
     private String generateProductDetails(Product product) {
-        String category = product.getProductCategory();
+        String category = product.getCategory();
         StringBuilder stringBuilder = new StringBuilder("<html>"
-                + "<b>Product ID:</b> " + product.getProductID() + "<br/>"
+                + "<b>Product ID:</b> " + product.getProductId() + "<br/>"
                 + "<b>Name:</b> " + product.getProductName() + "<br/>"
                 + "<b>Category:</b> " + category + "<br/>"
                 + "<b>Price:</b> £" + product.getPrice() + "<br/>");
@@ -160,13 +221,9 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
                     .append("<b>Colour:</b> ")
                     .append(c.getColor()).append("<br/>");
         }
-        stringBuilder.append("<b>Items Available:</b> ").append(product.getQuantity())
+        stringBuilder.append("<b>Items Available:</b> ").append(product.getNoItems())
                 .append("</html>");
         return stringBuilder.toString();
-    }
-}
-
-
     }
 }
 

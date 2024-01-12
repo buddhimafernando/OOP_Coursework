@@ -10,8 +10,24 @@ public class ShoppingCart {
         this.cart = new ArrayList<>();
     }
 
-    public void addProductToCart(Product product) {
-        cart.add(product);
+    public void addProductToCart(Product product, int quantity) {
+        boolean found = false;
+
+        for (Product cartProduct : cart) {
+            if (cartProduct.equals(product)) {
+                cartProduct.setNoItems(cartProduct.getNoItems() + quantity);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            // If the product is not already in the cart, add it
+            product.setNoItems(quantity);
+            cart.add(product);
+        }
+
+        System.out.println("Product added to the shopping cart.");
         System.out.println(product.getProductName() + " added to the cart.");
     }
 
@@ -21,6 +37,15 @@ public class ShoppingCart {
         } else {
             System.out.println("Product not found in the cart.");
         }
+    }
+
+    public int getQuantity(Product product) {
+        for (Product cartProduct : cart) {
+            if (cartProduct.equals(product)) {
+                return cartProduct.getNoItems();
+            }
+        }
+        return 0;
     }
 
     public double calculateTotalCost() {
