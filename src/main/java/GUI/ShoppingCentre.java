@@ -97,10 +97,10 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
     // ActionListener implementation
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getActionCommand().equalsIgnoreCase("View Cart")){
+        if(e.getActionCommand().equalsIgnoreCase("Shopping Cart")){
             shoppingCartFrame();
         }
-        else if(e.getActionCommand().equalsIgnoreCase("Add To Cart")){
+        else if(e.getActionCommand().equalsIgnoreCase("Add to Shopping Cart")){
             int idx = productTable.getSelectedRow();
             if (idx != -1) {
                 Product product = listOfProducts.get(idx);
@@ -115,15 +115,12 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
                 }
             }
         }
-        if(e.getActionCommand().equalsIgnoreCase("comboBoxChanged")){
+        if (e.getActionCommand().equalsIgnoreCase("comboBoxChanged")) {
             String category = (String) categories.getSelectedItem();
-            tableModel.setRowCount(0);
+            tableModel.setRowCount(0);  // Clear the existing rows
+
             for (Product product : listOfProducts) {
-                if(category.equalsIgnoreCase("All")){
-                    Object[] arr = {product.getProductId(), product.getProductName(), product.getCategory(), product.getPrice()};
-                    tableModel.addRow(arr);
-                }
-                else if(product.getCategory().equalsIgnoreCase(category)){
+                if (category.equalsIgnoreCase("All") || product.getCategory().equalsIgnoreCase(category)) {
                     Object[] arr = {product.getProductId(), product.getProductName(), product.getCategory(), product.getPrice()};
                     tableModel.addRow(arr);
                 }
@@ -142,6 +139,7 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
 
         JScrollPane scrollPane = new JScrollPane(new JTable(model));
         scrollPane.setBounds(10, 10, 580, 200);
+        panel.add(scrollPane);
 
         ArrayList<Product> products = cart.getCart();
         model.setRowCount(0);
@@ -183,6 +181,9 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
         JLabel finalL = new JLabel("Final Total: Rs. " + String.format("%.2f", (total - discount)));
         finalL.setFont(new Font("", Font.BOLD, 12));
         finalL.setBounds(370, 350, 400, 25);
+
+        panel.add(totalL);
+        panel.add(finalL);
 
         frame.add(panel);
 

@@ -44,6 +44,6 @@ public class Electronics extends Product{
 
     @Override
     public String getInfo() {
-        return brand+warrantyPeriod;
+        return brand+warrantyPeriod+" Months";
     }
 }
