@@ -1,0 +1,13 @@
+Electronics, 0001, kettle, 1, 1900.0, philips , 6
+Clothing, 0003, short, 3, 1380.0, BLUE , m
+Electronics, E001, Laptop, 2, 2500.0, Dell , 12
+Clothing, C002, T-shirt, 5, 25.5, RED , xl
+Electronics, E003, Headphones, 4, 120.0, Sony , 24
+Clothing, C004, Jeans, 2, 55.0, BLACK , s
+Electronics, E005, Smartwatch, 3, 150.0, Apple , 18
+Clothing, C006, Dress, 1, 80.0, WHITE , l
+Electronics, E007, Bluetooth Speaker, 5, 50.0, JBL , 12
+Clothing, C008, Sweater, 2, 45.0, GREEN , xxl
+Electronics, E009, Coffee Maker, 1, 80.0, Keurig , 12
+Clothing, C010, Skirt, 3, 30.0, YELLOW , s
+Electronics, 0004, brush, 1, 160.0, zanyo , 6
