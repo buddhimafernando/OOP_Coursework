@@ -101,6 +101,7 @@ public class Console {
 
                                     Electronics electronics = new Electronics(newProductId,newProductName,newQuantity,newPrice,newBrand,newWarrantyPeriod);
                                     shoppingManager.addProduct(electronics);
+                                    System.out.println("Product has been successfully removed...");
                                     break;
 
                                 default:
@@ -124,15 +125,30 @@ public class Console {
                     break;
 
                 case 3:
-                    // Print all products in the system
+                    // Print all products in the system alphabetically by productId
                     ArrayList<Product> listOfProducts = shoppingManager.getAllProducts();
+
+                    // Bubble sort to alphabetically order the products by productId
+                    for (int i = 0; i < listOfProducts.size() - 1; i++) {
+                        for (int j = 0; j < listOfProducts.size() - i - 1; j++) {
+                            String productId1 = listOfProducts.get(j).getProductId();
+                            String productId2 = listOfProducts.get(j + 1).getProductId();
+                            if (productId1.compareToIgnoreCase(productId2) > 0) {
+                                // Swap products if they are in the wrong order
+                                Product temp = listOfProducts.get(j);
+                                listOfProducts.set(j, listOfProducts.get(j + 1));
+                                listOfProducts.set(j + 1, temp);
+                            }
+                        }
+                    }
+
                     System.out.println("Number of products: " + listOfProducts.size());  // Debug print
 
                     for (Product product : listOfProducts) {
                         System.out.println(product.toString());
                     }
 
-                    System.out.println("Exiting loop");  // Debug print
+                    System.out.println("");  // Debug print
                     break;
 
 

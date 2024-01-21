@@ -5,25 +5,24 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class SignUpPage implements ActionListener {
 
-    JFrame jFrame = new JFrame("SignUp Page");
-    JLabel signUpLabel = new JLabel();
-    JLabel informationLabel = new JLabel("Set up your username and password");
-    JLabel enterUsernameLabel = new JLabel("Username : ");
-    JLabel enterPasswordLabel = new JLabel("Password : ");
-    JLabel reEnterPasswordLabel = new JLabel("Re-enter Password : ");
-    JTextField enterUsernameField = new JTextField();
-    JPasswordField enterPasswordField = new JPasswordField();
-    JPasswordField reEnterPasswordField = new JPasswordField();
-    JButton confirmButton = new JButton("Confirm");
-    JLabel successMessage = new JLabel();
-    IdAndPassword userInformation;
-
+    private JFrame jFrame = new JFrame("SignUp Page");
+    private JLabel signUpLabel = new JLabel();
+    private JLabel informationLabel = new JLabel("Set up your username and password");
+    private JLabel enterUsernameLabel = new JLabel("Username : ");
+    private JLabel enterPasswordLabel = new JLabel("Password : ");
+    private JLabel reEnterPasswordLabel = new JLabel("Re-enter Password : ");
+    private JTextField enterUsernameField = new JTextField();
+    private JPasswordField enterPasswordField = new JPasswordField();
+    private JPasswordField reEnterPasswordField = new JPasswordField();
+    private JButton confirmButton = new JButton("Confirm");
+    private JLabel successMessage = new JLabel();
+    private IdAndPassword userInformation;
 
     SignUpPage() {
-
         userInformation = new IdAndPassword();
 
         signUpLabel.setBounds(50, 20, 100, 25);
@@ -40,11 +39,11 @@ public class SignUpPage implements ActionListener {
         enterPasswordField.setBounds(180, 160, 170, 25);
         reEnterPasswordField.setBounds(180, 210, 170, 25);
 
-        confirmButton.setBounds(245, 285, 100, 25);
+        confirmButton.setBounds(245, 275, 100, 25);
         confirmButton.setFocusable(false);
         confirmButton.addActionListener(this);
 
-        successMessage.setBounds(50, 300, 100, 25);
+        successMessage.setBounds(50, 300, 300, 25);
 
         jFrame.add(signUpLabel);
         jFrame.add(informationLabel);
@@ -65,7 +64,40 @@ public class SignUpPage implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == confirmButton) {
+            String username = enterUsernameField.getText();
+            String password = String.valueOf(enterPasswordField.getPassword());
+            String reEnterPassword = String.valueOf(reEnterPasswordField.getPassword());
 
+            if (!password.equals(reEnterPassword)) {
+                successMessage.setForeground(Color.red);
+                successMessage.setText("Passwords do not match");
+            } else if (userInformation.userExists(username)) {
+                successMessage.setForeground(Color.red);
+                successMessage.setText("Username already exists. Try again");
+            } else {
+                userInformation.addUser(username, password);
+                try {
+                    userInformation.saveUsers();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                successMessage.setForeground(Color.black);
+                successMessage.setText("You have signed up successfully!");
 
+                // Open the login page after successful signup
+                openLoginPage();
+
+                jFrame.dispose(); // Close the signup page
+            }
+        }
     }
+
+    private void openLoginPage() {
+        SwingUtilities.invokeLater(() -> {
+            HashMap<String, String> loginInfo = userInformation.getLoginInfo();
+            new Login(loginInfo);
+        });
+    }
+
 }

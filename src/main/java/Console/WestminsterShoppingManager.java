@@ -9,34 +9,42 @@ import java.util.Scanner;
 
 public class WestminsterShoppingManager {
 
-    ArrayList <Product> products;
+    // ArrayList to store the products
+    ArrayList<Product> products;
+
+    // Constructor to initialize the ArrayList
     public WestminsterShoppingManager() {
         products = new ArrayList<>();
     }
 
+    // Method to add a product to the list
     public void addProduct(Product product) {
-        if(products.size()<50){
+        if (products.size() < 50) {
             products.add(product);
-        }else{
-            System.out.println("Product limit haas reached...");
+        } else {
+            System.out.println("Product limit has reached...");
         }
     }
 
+    // Method to remove a product from the list based on productId
     public void removeProduct(String productId) {
         Iterator<Product> iterator = products.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             Product product = iterator.next();
-            if (product.getProductId().equals(productId)){
+            if (product.getProductId().equals(productId)) {
                 iterator.remove();
                 return;
             }
-        } System.out.println("Product not found.");
+        }
+        System.out.println("Product not found.");
     }
 
+    // Method to get a copy of all products in the list
     public ArrayList<Product> getAllProducts() {
         return new ArrayList<>(this.products);
     }
 
+    // Method to save products to a file (ProductsList.txt)
     public void saveToFile() {
         try (FileWriter writer = new FileWriter("ProductsList.txt")) {
             for (Product product : products) {
@@ -48,6 +56,7 @@ public class WestminsterShoppingManager {
         }
     }
 
+    // Method to load products from a file (ProductsList.txt)
     public void loadFromFile() {
         try (Scanner scanner = new Scanner(new File("ProductsList.txt"))) {
             while (scanner.hasNextLine()) {
@@ -60,25 +69,17 @@ public class WestminsterShoppingManager {
                 if (productData.length >= 7) {
                     String productType = productData[0];
 
+                    // Handling different product types (Electronics, Clothing)
                     if (productType.equals("Electronics")) {
                         addProduct(new Electronics(
-                                productData[1], // productId
-                                productData[2], // productName
-                                Integer.parseInt(productData[3]), // noItems
-                                Double.parseDouble(productData[4]), // price
-                                productData[5], // brand
-                                Integer.parseInt(productData[6]) // warrantyPeriod
+                                productData[1], productData[2], Integer.parseInt(productData[3]),
+                                Double.parseDouble(productData[4]), productData[5], Integer.parseInt(productData[6])
                         ));
                     } else if (productType.equals("Clothing")) {
-                        // Handle Clothing size differently
                         String size = productData[5].toUpperCase(); // Convert to uppercase for consistency
                         addProduct(new Clothing(
-                                productData[1], // productId
-                                productData[2], // productName
-                                Integer.parseInt(productData[3]), // noItems
-                                Double.parseDouble(productData[4]), // price
-                                size, // size
-                                productData[6] // color
+                                productData[1], productData[2], Integer.parseInt(productData[3]),
+                                Double.parseDouble(productData[4]), size, productData[6]
                         ));
                     } else {
                         System.err.println("Invalid product type: " + productType);
@@ -97,4 +98,3 @@ public class WestminsterShoppingManager {
         }
     }
 }
-

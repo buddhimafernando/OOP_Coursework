@@ -3,6 +3,7 @@ package GUI;
 import Console.Clothing;
 import Console.Electronics;
 import Console.Product;
+import Console.User;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,43 +14,50 @@ import javax.swing.*;
 
 public class Login implements ActionListener {
 
-    JFrame frame = new JFrame();
-    JButton loginButton = new JButton("Login");
-    JButton resetButton = new JButton("Reset");
-    JTextField userIDField = new JTextField();
-    JPasswordField userPasswordField = new JPasswordField();
-    JLabel userIDLabel = new JLabel("Username:");
-    JLabel userPasswordLabel = new JLabel("Password:");
-    JLabel messageLabel = new JLabel();
-    HashMap<String, String> logininfo = new HashMap<String, String>();
+    private JFrame frame = new JFrame("Login Page");
+    private JLabel loginLabel = new JLabel();
+    private JButton loginButton = new JButton("Login");
+    private JButton resetButton = new JButton("Reset");
+    private JButton signUpButton = new JButton("Sign Up");
+    private JTextField userIDField = new JTextField();
+    private JPasswordField userPasswordField = new JPasswordField();
+    private JLabel userIDLabel = new JLabel("Username:");
+    private JLabel userPasswordLabel = new JLabel("Password:");
+    private JLabel messageLabel = new JLabel();
+    private JLabel signUpLabel = new JLabel("If you don't have an account");
+    private HashMap<String, String> logininfo = new HashMap<>();
 
-    Login(HashMap<String, String> loginInfoOriginal) {
-
+    public Login(HashMap<String, String> loginInfoOriginal) {
         logininfo = loginInfoOriginal;
 
-        userIDLabel.setBounds(60,80,75,25);
-        userPasswordLabel.setBounds(60,130,75,25);
+        loginLabel.setBounds(50, 20, 100, 25);
+        loginLabel.setFont(new Font(null, Font.BOLD, 15));
+        loginLabel.setText("Login");
 
-        messageLabel.setBounds(110,320,250,25);
-        messageLabel.setFont(new Font(null,Font.BOLD,18));
+        userIDLabel.setBounds(60, 80, 75, 25);
+        userPasswordLabel.setBounds(60, 130, 75, 25);
 
-        //signUpLabel.setBounds(60,260,250,35);
+        messageLabel.setBounds(110, 320, 250, 25);
+        messageLabel.setFont(new Font(null, Font.BOLD, 18));
 
-        userIDField.setBounds(135,80,200,25);
-        userPasswordField.setBounds(135,130,200,25);
+        signUpLabel.setBounds(60, 260, 250, 35);
 
-        loginButton.setBounds(135,180,95,25);
+        userIDField.setBounds(135, 80, 200, 25);
+        userPasswordField.setBounds(135, 130, 200, 25);
+
+        loginButton.setBounds(135, 180, 95, 25);
         loginButton.setFocusable(false);
         loginButton.addActionListener(this);
 
-        resetButton.setBounds(240,180,95,25);
+        resetButton.setBounds(240, 180, 95, 25);
         resetButton.setFocusable(false);
         resetButton.addActionListener(this);
 
-//        signUpButton.setBounds(235,265,100,25);
-//        signUpButton.setFocusable(false);
-//        signUpButton.addActionListener(this);
+        signUpButton.setBounds(235, 265, 100, 25);
+        signUpButton.setFocusable(false);
+        signUpButton.addActionListener(this);
 
+        frame.add(loginLabel);
         frame.add(userIDLabel);
         frame.add(userPasswordLabel);
         frame.add(messageLabel);
@@ -57,16 +65,16 @@ public class Login implements ActionListener {
         frame.add(userPasswordField);
         frame.add(loginButton);
         frame.add(resetButton);
-//        frame.add(signUpButton);
-//        frame.add(signUpLabel);
+        frame.add(signUpButton);
+        frame.add(signUpLabel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(420,420);
+        frame.setSize(420, 420);
         frame.setLayout(null);
         frame.setVisible(true);
     }
 
-    public void loadProducts(ArrayList<Product> products) {
+    private void loadProducts(ArrayList<Product> products) {
         try (Scanner scanner = new Scanner(new File("ProductsList.txt"))) {
             while (scanner.hasNextLine()) {
                 String productLine = scanner.nextLine();
@@ -124,18 +132,14 @@ public class Login implements ActionListener {
     }
 
 
-
-
     @Override
     public void actionPerformed(ActionEvent e) {
-
         if (e.getSource() == resetButton) {
             userIDField.setText("");
             userPasswordField.setText("");
         }
 
         if (e.getSource() == loginButton) {
-
             String userID = userIDField.getText();
             String password = String.valueOf(userPasswordField.getPassword());
 
@@ -145,9 +149,10 @@ public class Login implements ActionListener {
                     messageLabel.setText("Login successful");
                     frame.dispose();
 
+                    User user = new User(userID, password);
                     ArrayList<Product> products = new ArrayList<>();
                     loadProducts(products);
-                    ShoppingCentre shoppingCentre = new ShoppingCentre(products);
+                    ShoppingCentre shoppingCentre = new ShoppingCentre(products, user);
                 } else {
                     messageLabel.setForeground(Color.red);
                     messageLabel.setText("Recheck password");
@@ -158,5 +163,20 @@ public class Login implements ActionListener {
                 messageLabel.setText("Username not found");
             }
         }
+
+        if (e.getSource() == signUpButton) {
+            frame.dispose();
+            // Pass the existing logininfo to the SignUpPage constructor
+            SignUpPage signUpPage = new SignUpPage();
+        }
+    }
+
+    public static void main(String[] args) {
+        // For testing the Login class
+        HashMap<String, String> loginInfo = new HashMap<>();
+        loginInfo.put("user1", "password1");
+        loginInfo.put("user2", "password2");
+        new Login(loginInfo);
+
     }
 }

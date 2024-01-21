@@ -1,9 +1,6 @@
 package GUI;
 
-import Console.Clothing;
-import Console.Electronics;
-import Console.Product;
-import Console.ShoppingCart;
+import Console.*;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -20,6 +17,8 @@ import java.util.Map;
 
 public class ShoppingCentre implements ActionListener, ListSelectionListener {
 
+    private User currentUser;
+    private JButton checkOutBtn;
     private ArrayList<Product> listOfProducts;
 
     private JLabel selectCategory = new JLabel("Select Product Category ");
@@ -38,8 +37,9 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
 
     private int userPurchaseCount = 0;
 
-    ShoppingCentre(ArrayList<Product> list) {
+    ShoppingCentre(ArrayList<Product> list, User user) {
         this.listOfProducts = list;
+        this.currentUser = user;
         cart = new ShoppingCart();
 
         JFrame jFrame = new JFrame("Westminster Shopping Centre");
@@ -94,6 +94,89 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
         jFrame.setVisible(true);
     }
 
+    private void shoppingCartFrame() {
+        JFrame frame = new JFrame("Shopping Cart");
+        frame.setSize(600, 450);
+        JPanel panel = new JPanel();
+        panel.setLayout(null);
+
+        DefaultTableModel model = new DefaultTableModel(
+                new String[]{"Product", "Quantity", "Price"}, 0);
+
+        JScrollPane scrollPane = new JScrollPane(new JTable(model));
+        scrollPane.setBounds(10, 10, 580, 200);
+        panel.add(scrollPane);
+
+        ArrayList<Product> products = cart.getCart();
+        model.setRowCount(0);
+
+        double total = 0;
+        boolean threeItems = false;
+        boolean firstPurchase = false;
+        int electronicsCount = 0;
+        int clothingCount = 0;
+        double discount = 0;
+
+        for (Product product : products) {
+            int quantity = cart.getQuantity(product);
+
+            Object[] arr = {product.getProductId() + ", " + product.getProductName() + ", " + product.getInfo(), quantity, (quantity * product.getPrice())};
+            model.addRow(arr);
+            total += (quantity * product.getPrice());
+
+            if (product.getCategory().equalsIgnoreCase("Electronics")) {
+                electronicsCount += quantity;
+            } else if (product.getCategory().equalsIgnoreCase("Clothing")) {
+                clothingCount += quantity;
+            }
+
+            if (electronicsCount >= 3 || clothingCount >= 3) {
+                threeItems = true;
+            }
+
+            if (currentUser.getPurchaseCount() < 1) {
+                firstPurchase = true;
+            }
+        }
+
+        JLabel totalL = new JLabel("Total: Rs. " + String.format("%.2f", total));
+        totalL.setBounds(400, 250, 200, 30);
+
+        if (threeItems) {
+            discount = (total * 0.20);
+            JLabel discountLbl20 = new JLabel("Three items in the same Category Discount (20%): -Rs. " + String.format("%.2f", discount));
+            discountLbl20.setBounds(150, 280, 400, 25);
+            panel.add(discountLbl20);
+        }
+
+        if (firstPurchase) {
+            discount = (total * 0.10);
+            JLabel discountLbl10 = new JLabel("First Purchase Discount (10%) : -Rs. " + String.format("%.2f", discount));
+            discountLbl10.setBounds(250, 320, 400, 25);
+            panel.add(discountLbl10);
+        }
+
+        JLabel finalL = new JLabel("Final Total: Rs. " + String.format("%.2f", (total - discount)));
+        finalL.setFont(new Font("", Font.BOLD, 12));
+        finalL.setBounds(370, 350, 400, 25);
+
+        checkOutBtn = new JButton("Confirm purchase");
+        checkOutBtn.addActionListener(this);
+        checkOutBtn.setBounds(430, 380, 100, 25);
+        checkOutBtn.setFont(new Font("", Font.BOLD, 12));
+
+        panel.add(totalL);
+        panel.add(finalL);
+        panel.add(checkOutBtn);
+
+        frame.add(panel);
+
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+        frame.setVisible(true);
+    }
+
     // ActionListener implementation
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -115,6 +198,14 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
                 }
             }
         }
+
+        else if (e.getSource() == checkOutBtn) {
+            // Perform checkout actions
+            clearShoppingCart();
+            incrementUserPurchaseCount();
+            JOptionPane.showMessageDialog(null, "Checkout successful!\nYour purchases count has been increased by one.");
+        }
+
         if (e.getActionCommand().equalsIgnoreCase("comboBoxChanged")) {
             String category = (String) categories.getSelectedItem();
             tableModel.setRowCount(0);  // Clear the existing rows
@@ -128,69 +219,12 @@ public class ShoppingCentre implements ActionListener, ListSelectionListener {
         }
     }
 
-    private void shoppingCartFrame() {
-        JFrame frame = new JFrame("Shopping Cart");
-        frame.setSize(600, 450);
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
+    private void clearShoppingCart() {
+        cart.clearCart();
+    }
 
-        DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Product", "Quantity", "Price"}, 0);
-
-        JScrollPane scrollPane = new JScrollPane(new JTable(model));
-        scrollPane.setBounds(10, 10, 580, 200);
-        panel.add(scrollPane);
-
-        ArrayList<Product> products = cart.getCart();
-        model.setRowCount(0);
-
-        double total = 0;
-        boolean threeItems = false;
-        int electronicsCount = 0;
-        int clothingCount = 0;
-        double discount = 0;
-
-        for (Product product : products) {
-            int quantity = cart.getQuantity(product);
-
-            Object[] arr = {product.getProductId() + ", " + product.getProductName() + ", " + product.getInfo(), quantity, (quantity * product.getPrice())};
-            model.addRow(arr);
-            total += (quantity * product.getPrice());
-
-            if (product.getCategory().equalsIgnoreCase("Electronics")) {
-                electronicsCount += quantity;
-            } else if (product.getCategory().equalsIgnoreCase("Clothing")) {
-                clothingCount += quantity;
-            }
-
-            if (electronicsCount >= 3 || clothingCount >= 3) {
-                threeItems = true;
-            }
-        }
-
-        JLabel totalL = new JLabel("Total: Rs. " + String.format("%.2f", total));
-        totalL.setBounds(400, 250, 200, 30);
-
-        if (threeItems) {
-            discount = (total * 0.20);
-            JLabel discountLbl20 = new JLabel("Three items in the same Category Discount (20%): -Rs. " + String.format("%.2f", discount));
-            discountLbl20.setBounds(120, 280, 400, 25);
-            panel.add(discountLbl20);
-        }
-
-        JLabel finalL = new JLabel("Final Total: Rs. " + String.format("%.2f", (total - discount)));
-        finalL.setFont(new Font("", Font.BOLD, 12));
-        finalL.setBounds(370, 350, 400, 25);
-
-        panel.add(totalL);
-        panel.add(finalL);
-
-        frame.add(panel);
-
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-        frame.setVisible(true);
+    private void incrementUserPurchaseCount() {
+        currentUser.increasePurchaseCount();
     }
 
     @Override
